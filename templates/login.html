@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Login IRMADA</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<style>
+
+body{
+background:#f5f7f6;
+}
+
+.login-card{
+border:none;
+border-radius:10px;
+box-shadow:0 4px 15px rgba(0,0,0,0.08);
+}
+
+.logo{
+width:80px;
+}
+footer{
+background:white;
+border-top:1px solid rgba(0,0,0,0.05);
+font-size:13px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container mt-5">
+
+<div class="text-center mb-4">
+
+<img src="/static/logo.jpeg" class="logo">
+
+<h4 class="mt-2">IRMADA</h4>
+
+<small>
+Ikatan Remaja Masjid Daarul Muttaqin
+</small>
+
+</div>
+
+
+<div class="row justify-content-center">
+
+<div class="col-md-4">
+
+<div class="card login-card p-4">
+
+{% if error %}
+
+<div class="alert alert-danger">
+Username atau password salah
+</div>
+
+{% endif %}
+
+<form method="post" action="/login">
+
+<input class="form-control mb-3" name="username" placeholder="Username">
+
+<input class="form-control mb-3" type="password" name="password" placeholder="Password">
+
+<button class="btn btn-primary w-100">
+Login
+</button>
+
+</form>
+
+</div>
+
+
+<div class="card mt-3 p-3">
+
+<h6>Informasi Zakat</h6>
+
+<p style="font-size:14px">
+
+Aplikasi ini digunakan oleh panitia IRMADA untuk
+mencatat penerimaan zakat fitrah, zakat maal,
+infaq dan shodaqoh.
+
+Data yang tercatat akan digunakan untuk
+laporan pengelolaan zakat Masjid Daarul Muttaqin.
+
+</p>
+
+<div class="card mt-3 p-3">
+
+<h6>Informasi Penerimaan Zakat</h6>
+
+<div class="row text-center">
+
+<div class="col-6 mt-2">
+<b>{{ total_jiwa }}</b><br>
+<small>Jiwa Zakat Fitrah</small>
+</div>
+
+<div class="col-6 mt-2">
+<b>{{ total_bungkus }}</b><br>
+<small>Bungkus Beras</small>
+</div>
+
+<div class="col-6 mt-3">
+<b>Rp {{ "{:,.0f}".format(total_maal).replace(",",".") }}</b><br>
+<small>Zakat Maal</small>
+</div>
+
+<div class="col-6 mt-3">
+<b>Rp {{ "{:,.0f}".format(total_infaq).replace(",",".") }}</b><br>
+<small>Infaq</small>
+</div>
+
+<div class="col-12 mt-3">
+<b>Rp {{ "{:,.0f}".format(total_shodaqoh).replace(",",".") }}</b><br>
+<small>Shodaqoh</small>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<footer class="mt-5">
+
+<hr style="opacity:0.1">
+
+<div class="text-center py-3">
+
+<small class="text-muted">
+
+Sistem Pendataan Zakat  
+Masjid Daarul Muttaqin  
+
+<br>
+
+© 2026 IRMADA  
+Ikatan Remaja Masjid Daarul Muttaqin  
+RT 02 RW 01 Ajibarang Wetan
+
+</small>
+
+</div>
+
+</footer>
+</body>
+</html>

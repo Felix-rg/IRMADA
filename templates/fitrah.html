@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Input Zakat Fitrah</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<style>
+footer{
+background:white;
+border-top:1px solid rgba(0,0,0,0.05);
+font-size:13px;
+}
+</style>
+
+</head>
+
+
+<body class="bg-light" style="background:#f4f8f4;">
+
+<div class="container text-center mt-4 mb-4">
+    
+<img src="/static/logo.jpeg" style="width:150px">
+
+<h2 class="mt-3" class="mt-3 text-success">
+IRMADA
+</h2>
+
+<h5>
+Ikatan Remaja Masjid Daarul Muttaqin
+</h5>
+
+<p>
+Desa Ajibarang Wetan RT 02 RW 01<br>
+Masjid Daarul Muttaqin
+</p>
+
+<hr>
+
+</div>
+
+<div class="container mt-4">
+    
+<h3 class="mb-4">Input Zakat Fitrah</h3>
+
+<div class="card">
+<div class="card-body">
+    
+<div id="alertBox"></div> 
+
+<form method="post">
+
+<div class="mb-3">
+    <label class="form-label">Tanggal</label>
+<input type="date" class="form-control" name="tanggal" id="tanggal" required>
+</div>
+
+<div class="mb-3">
+<label class="form-label">Nama Kepala Keluarga</label>
+<input type="text" class="form-control" name="nama" id="nama" required>
+</div>
+
+<div class="mb-3">
+<label class="form-label">Alamat</label>
+<input type="text" class="form-control" name="alamat" required>
+</div>
+
+<div class="mb-3">
+<label class="form-label">Jumlah Jiwa</label>
+<input type="number" class="form-control" name="jiwa" required>
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Jumlah Bungkus Beras</label>
+<input type="number" class="form-control" name="bungkus" required>
+</div>
+
+<button type="submit" class="btn btn-primary w-100 mb-2">
+Simpan
+</button>
+
+<a href="/" class="btn btn-secondary w-100">
+Kembali
+</a>
+
+</form>
+
+</div>
+</div>
+
+</div>
+
+
+<div class="toast-container position-fixed top-0 end-0 p-3">
+
+    <div id="successToast" class="toast align-items-center text-bg-success border-0" role="alert">
+<div class="d-flex">
+    <div class="toast-body">
+        ✅ Data berhasil disimpan
+</div>
+<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+</div>
+</div>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+
+let now = new Date();
+
+let year = now.getFullYear();
+let month = String(now.getMonth() + 1).padStart(2,'0');
+let day = String(now.getDate()).padStart(2,'0');
+
+let today = year + "-" + month + "-" + day;
+
+document.getElementById("tanggal").value = today;
+
+let tanggal = document.getElementById("tanggal");
+
+if(tanggal){
+tanggal.value = today;
+}
+
+});
+
+document.addEventListener("DOMContentLoaded", function(){
+
+let nama = document.getElementById("nama");
+
+if(nama){
+nama.focus();
+}
+
+});
+
+
+document.addEventListener("DOMContentLoaded", function(){
+
+const urlParams = new URLSearchParams(window.location.search);
+
+if(urlParams.get('success') === '1'){
+
+let toastElement = document.getElementById("successToast");
+
+let toast = new bootstrap.Toast(toastElement,{
+delay:3000
+});
+
+toast.show();
+
+window.history.replaceState({}, document.title, window.location.pathname);
+
+}
+
+});
+</script>
+
+</body>
+<footer class="mt-5">
+
+<hr style="opacity:0.1">
+
+<div class="text-center py-3">
+
+<small class="text-muted">
+
+Sistem Pendataan Zakat  
+Masjid Daarul Muttaqin  
+
+<br>
+
+© 2026 IRMADA  
+Ikatan Remaja Masjid Daarul Muttaqin  
+RT 02 RW 01 Ajibarang Wetan
+
+</small>
+
+</div>
+
+</footer>
+</html>
