@@ -465,7 +465,11 @@ def export_fitrah():
     file = "laporan_fitrah.xlsx"
     wb.save(file)
 
-    return FileResponse(file, filename=file)
+    return FileResponse(
+    file,
+    media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    filename="laporan_fitrah.xlsx"
+)
 
 @app.get("/export_maal")
 def export_maal():
@@ -499,5 +503,9 @@ def export_maal():
     file = "laporan_maal.xlsx"
     wb.save(file)
 
-    return FileResponse(file, filename=file)
+    return FileResponse(
+    file,
+    media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    filename="laporan_maal.xlsx"
+)
 
