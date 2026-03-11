@@ -2,7 +2,7 @@ from datetime import datetime
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, Request, Form
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from openpyxl import load_workbook
 from fastapi.responses import RedirectResponse
 from fastapi.responses import RedirectResponse
@@ -432,3 +432,72 @@ def logout(request: Request):
     request.session.clear()
 
     return RedirectResponse("/login", status_code=303)
+
+@app.get("/export_fitrah")
+def export_fitrah():
+
+    conn = db()
+    cur = conn.cursor()
+
+    cur.execute("SELECT tanggal,nama,alamat,jiwa,bungkus FROM fitrah ORDER BY id ASC")
+    data = cur.fetchall()
+
+    conn.close()
+
+    wb = load_workbook("ZAKAT FITRAH 2026.xlsx")
+    ws = wb.active
+
+    row = 7
+
+    for i,x in enumerate(data,start=1):
+
+        ws.cell(row=row,column=1).value = i
+        ws.cell(row=row,column=2).value = x[0]
+        ws.cell(row=row,column=3).value = datetime.now().strftime("%H:%M")
+        ws.cell(row=row,column=4).value = x[1]
+        ws.cell(row=row,column=5).value = x[2]
+        ws.cell(row=row,column=6).value = "Zakat Fitrah"
+        ws.cell(row=row,column=7).value = x[3]
+        ws.cell(row=row,column=8).value = x[4]
+
+        row += 1
+
+    file = "laporan_fitrah.xlsx"
+    wb.save(file)
+
+    return FileResponse(file, filename=file)
+
+@app.get("/export_maal")
+def export_maal():
+
+    conn = db()
+    cur = conn.cursor()
+
+    cur.execute("SELECT tanggal,nama,jenis,nominal FROM maal ORDER BY id ASC")
+    data = cur.fetchall()
+
+    conn.close()
+
+    wb = load_workbook("ZAKAT MAAL_INFAQ_SHODAQOH 2026.xlsx")
+    ws = wb.active
+
+    row = 7
+
+    for i,x in enumerate(data,start=1):
+
+        ws.cell(row=row,column=1).value = i
+        ws.cell(row=row,column=2).value = x[0]
+        ws.cell(row=row,column=3).value = datetime.now().strftime("%H:%M")
+        ws.cell(row=row,column=4).value = x[1]
+        ws.cell(row=row,column=5).value = ""
+        ws.cell(row=row,column=6).value = "Zakat"
+        ws.cell(row=row,column=7).value = x[2]
+        ws.cell(row=row,column=8).value = x[3]
+
+        row += 1
+
+    file = "laporan_maal.xlsx"
+    wb.save(file)
+
+    return FileResponse(file, filename=file)
+

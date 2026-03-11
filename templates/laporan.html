@@ -68,6 +68,95 @@ font-size:13px;
 }
 </style>
 
+<script>
+
+let pageFitrah = 1
+let pageMaal = 1
+
+let rowsPerPage = 10
+
+
+function showPageFitrah(page){
+
+let rows = document.querySelectorAll("#tableFitrah tbody tr")
+let totalPages = Math.ceil(rows.length / rowsPerPage)
+
+if(page < 1) page = 1
+if(page > totalPages) page = totalPages
+
+pageFitrah = page
+
+rows.forEach((row,i)=>{
+
+row.style.display = "none"
+
+if(i >= (page-1)*rowsPerPage && i < page*rowsPerPage){
+row.style.display = ""
+}
+
+})
+
+document.getElementById("pageInfoFitrah").innerText =
+"Halaman " + page + " / " + totalPages
+
+}
+
+
+function nextPageFitrah(){
+showPageFitrah(pageFitrah + 1)
+}
+
+function prevPageFitrah(){
+showPageFitrah(pageFitrah - 1)
+}
+
+
+
+function showPageMaal(page){
+
+let rows = document.querySelectorAll("#tableMaal tbody tr")
+let totalPages = Math.ceil(rows.length / rowsPerPage)
+
+if(page < 1) page = 1
+if(page > totalPages) page = totalPages
+
+pageMaal = page
+
+rows.forEach((row,i)=>{
+
+row.style.display = "none"
+
+if(i >= (page-1)*rowsPerPage && i < page*rowsPerPage){
+row.style.display = ""
+}
+
+})
+
+document.getElementById("pageInfoMaal").innerText =
+"Halaman " + page + " / " + totalPages
+
+}
+
+
+function nextPageMaal(){
+showPageMaal(pageMaal + 1)
+}
+
+function prevPageMaal(){
+showPageMaal(pageMaal - 1)
+}
+
+
+
+document.addEventListener("DOMContentLoaded", function(){
+
+showPageFitrah(1)
+showPageMaal(1)
+
+})
+
+</script>
+
 </head>
 
 
@@ -243,7 +332,18 @@ Hapus
 </tbody>
 
 </table>
+<div class="d-flex justify-content-center mt-3">
 
+<button class="btn btn-sm btn-secondary me-2" onclick="prevPageFitrah()">Prev</button>
+
+<span id="pageInfoFitrah" class="me-2"></span>
+
+<button class="btn btn-sm btn-secondary" onclick="nextPageFitrah()">Next</button>
+
+</div>
+    <a href="/export_fitrah" class="btn btn-success mb-3">
+    Export Excel Fitrah
+    </a>
 </div>
 
 
@@ -253,7 +353,7 @@ Hapus
 
 <div class="table-responsive">
     
-    <table class="table table-striped table-bordered">
+    <table id="tableMaal" class="table table-striped table-bordered">
         
         <thead class="table-dark">
 
@@ -322,7 +422,18 @@ Hapus
 </tbody>
 
 </table>
+<div class="d-flex justify-content-center mt-3">
 
+<button class="btn btn-sm btn-secondary me-2" onclick="prevPageMaal()">Prev</button>
+
+<span id="pageInfoMaal" class="me-2"></span>
+
+<button class="btn btn-sm btn-secondary" onclick="nextPageMaal()">Next</button>
+
+</div>
+    <a href="/export_maal" class="btn btn-success mb-3">
+    Export Excel Zakat Maal
+    </a>
 </div>
 
 </div>
