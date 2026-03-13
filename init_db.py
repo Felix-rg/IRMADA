@@ -1,23 +1,41 @@
 import sqlite3
 
 conn = sqlite3.connect("database.db")
-c = conn.cursor()
+cur = conn.cursor()
 
-c.execute("""
-CREATE TABLE IF NOT EXISTS fitrah (
+# =========================
+# TABEL ZAKAT FITRAH
+# =========================
+
+cur.execute("""
+CREATE TABLE fitrah (
 id INTEGER PRIMARY KEY AUTOINCREMENT,
 tanggal TEXT,
+jam TEXT,
+kategori TEXT,
 nama TEXT,
 alamat TEXT,
-jiwa INTEGER
+rt TEXT,
+rw TEXT,
+jiwa INTEGER,
+bungkus INTEGER
 )
 """)
 
-c.execute("""
-CREATE TABLE IF NOT EXISTS maal (
+# =========================
+# TABEL ZAKAT MAAL
+# =========================
+
+cur.execute("""
+CREATE TABLE maal (
 id INTEGER PRIMARY KEY AUTOINCREMENT,
 tanggal TEXT,
+jam TEXT,
+kategori TEXT,
 nama TEXT,
+alamat TEXT,
+rt TEXT,
+rw TEXT,
 jenis TEXT,
 nominal INTEGER
 )
@@ -26,4 +44,4 @@ nominal INTEGER
 conn.commit()
 conn.close()
 
-print("database siap")
+print("DATABASE BERHASIL DIBUAT")

@@ -16,7 +16,106 @@ border-top:1px solid rgba(0,0,0,0.05);
 font-size:13px;
 }
 </style>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
 
+/* =====================
+   TANGGAL OTOMATIS
+===================== */
+
+let now = new Date();
+let year = now.getFullYear();
+let month = String(now.getMonth() + 1).padStart(2,'0');
+let day = String(now.getDate()).padStart(2,'0');
+
+let today = year + "-" + month + "-" + day;
+
+let tanggal = document.getElementById("tanggal");
+if(tanggal){
+tanggal.value = today;
+}
+
+/* =====================
+   AUTO FOCUS NAMA
+===================== */
+
+let nama = document.getElementById("nama");
+if(nama){
+nama.focus();
+}
+
+/* =====================
+   TOAST SUCCESS
+===================== */
+
+const urlParams = new URLSearchParams(window.location.search);
+
+if(urlParams.get('success') === '1'){
+
+let toastElement = document.getElementById("successToast");
+
+let toast = new bootstrap.Toast(toastElement,{
+delay:3000
+});
+
+toast.show();
+
+window.history.replaceState({}, document.title, window.location.pathname);
+
+}
+
+/* =====================
+   ALAMAT SELECT
+===================== */
+
+const alamatSelect = document.getElementById("alamatSelect");
+const manualAlamat = document.getElementById("manualAlamat");
+
+if(alamatSelect){
+
+alamatSelect.addEventListener("change", function(){
+
+if(alamatSelect.value === "lainnya"){
+manualAlamat.style.display = "block";
+}else{
+manualAlamat.style.display = "none";
+}
+
+});
+
+}
+
+/* =====================
+   NOMINAL SELECT
+===================== */
+
+const nominalSelect = document.getElementById("nominalSelect");
+const manualNominal = document.getElementById("manualNominal");
+const manualInput = document.querySelector("input[name='nominal']");
+
+if(nominalSelect){
+
+nominalSelect.addEventListener("change", function(){
+
+if(nominalSelect.value === "lainnya"){
+
+manualNominal.style.display = "block";
+manualInput.focus();
+
+}else{
+
+manualNominal.style.display = "none";
+manualInput.value = nominalSelect.value;
+
+}
+
+});
+
+}
+
+});
+
+</script>
 </head>
 
 
@@ -47,54 +146,135 @@ Masjid Daarul Muttaqin
 
 <h3 class="mb-4">Input Zakat Maal / Infaq / Shodaqoh</h3>
 
-<div class="card">
-    <div class="card-body">
+    <div class="card">
+        <div class="card-body">
 
-<div id="alertBox"></div> 
+            <div id="alertBox"></div> 
 
-<form method="post">
+            <form method="post">
 
-<div class="mb-3">
-    <label class="form-label">Tanggal</label>
-<input type="date" class="form-control" name="tanggal" id="tanggal" required>
-</div>
+                <div class="mb-3">
+                    <label class="form-label">Tanggal</label>
+                    <input type="date" class="form-control" name="tanggal" id="tanggal" required>
+                </div>
 
-<div class="mb-3">
-<label class="form-label">Nama</label>
-<input type="text" class="form-control" name="nama" id="nama" required>
-</div>
+                <div class="mb-3">
+                    <label class="form-label">Kategori</label>
+                        <select class="form-control" name="kategori">
+                            <option value="perorangan">Perorangan</option>
+                            <option value="instansi">Instansi</option>
+                        </select>
+                </div>
 
-<div class="mb-3">
-<label class="form-label">Jenis Zakat</label>
+                <div class="mb-3">
+                    <label class="form-label">Nama Kepala Keluarga</label>
+                    <input type="text" class="form-control" name="nama" id="nama" required>
+                </div>
 
-<select class="form-control" name="jenis">
+                <div class="mb-3">
+                    <label class="form-label">Alamat</label>
+                    <select name="alamat" id="alamatSelect" class="form-select">
+                        <option value="Ajibarang Wetan">Ajibarang Wetan</option>
+                        <option value="Ajibarang Kulon">Ajibarang Kulon</option>
+                        <option value="lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div class="mb-3" id="manualAlamat" style="display:none;">
+                        <label class="form-label">Alamat Manual</label>
+                        <input
+                        type="text"
+                        class="form-control"
+                        name="alamat_manual"
+                        placeholder="Masukkan alamat">
+                </div>
+                    <div class="mb-3">
+                    <label class="form-label">RT</label>
+                        <select class="form-select" name="rt" required>
+    
+                            <option value="">Pilih RT</option>
+    
+                            <option value="01">01</option>
+                            <option value="02">02</option>
+                            <option value="03">03</option>
+                            <option value="04">04</option>
+                            <option value="05">05</option>
+                            <option value="06">06</option>
+                            <option value="07">07</option>
+                            <option value="08">08</option>
+                            <option value="09">09</option>
+                            <option value="10">10</option>
+    
+                        </select>
+                    </div>
+    
+                    <div class="mb-3">
+                        <label class="form-label">RW</label>
+                        <select class="form-select" name="rw" required>
+    
+                            <option value="">Pilih RW</option>
+    
+                            <option value="01">01</option>
+                            <option value="02">02</option>
+                            <option value="03">03</option>
+                            <option value="04">04</option>
+                            <option value="05">05</option>
+                            <option value="06">06</option>
+                            <option value="07">07</option>
+                            <option value="08">08</option>
+                            <option value="09">09</option>
+                            <option value="10">10</option>
+    
+                        </select>
+                    </div>
 
-    <option>Zakat Maal</option>
-<option>Infaq</option>
-<option>Shodaqoh</option>
+                <div class="mb-3">
+                    <label class="form-label">Jenis Zakat</label>
+                    <select class="form-select" name="jenis" required>
 
-</select>
+                        <option value="Zakat Maal">Zakat Maal</option>
+                        <option value="Infaq">Infaq</option>
+                        <option value="Shodaqoh">Shodaqoh</option>
 
-</div>
+                    </select>
+                </div>
 
-<div class="mb-3">
-<label class="form-label">Nominal</label>
-<input type="number" class="form-control" name="nominal" required>
-</div>
+                <div class="mb-3">
+                    <label class="form-label">Nominal</label>
+                    <select class="form-select" id="nominalSelect" name="nominal_select" required>
 
-<button class="btn btn-primary w-100 mb-2">
-Simpan
-</button>
+                        <option value="">Pilih nominal</option>
+                        <option value="10000">10.000</option>
+                        <option value="20000">20.000</option>
+                        <option value="50000">50.000</option>
+                        <option value="100000">100.000</option>
+                        <option value="200000">200.000</option>
+                        <option value="lainnya">Lainnya</option>
 
-<a href="/" class="btn btn-secondary w-100">
-Kembali
-</a>
+                    </select>
+                </div>
+                    <div class="mb-3" id="manualNominal" style="display:none;">
+                        <label class="form-label">Nominal Manual</label>
+                        <input
+                        type="number"
+                        inputmode="numeric"
+                        class="form-control"
+                        name="nominal"
+                        placeholder="Masukkan nominal">
+                    </div>
 
-</form>
+                    <button class="btn btn-primary w-100 mb-2">
+                    Simpan
+                    </button>
+    
+                    <a href="/" class="btn btn-secondary w-100">
+                    Kembali
+                    </a>
+    
+            </form>
+                </div>
 
-</div>
-</div>
 
+        </div>
 </div>
 
 <div class="toast-container position-fixed top-0 end-0 p-3">

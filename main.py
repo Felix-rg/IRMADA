@@ -47,8 +47,12 @@ def form_fitrah(request: Request):
 @app.post("/fitrah")
 def simpan_fitrah(
     tanggal:str=Form(...),
+    jam = datetime.now().strftime("%H:%M"),
+    kategori:str=Form(...),
     nama:str=Form(...),
     alamat:str=Form(...),
+    rt:str=Form(...),
+    rw:str=Form(...),
     jiwa:int=Form(...),
     bungkus:int=Form(...)
 ):
@@ -57,9 +61,13 @@ def simpan_fitrah(
     cur = conn.cursor()
 
     cur.execute(
-    "INSERT INTO fitrah (tanggal,nama,alamat,jiwa,bungkus) VALUES (?,?,?,?,?)",
-    (tanggal,nama,alamat,jiwa,bungkus)
-    )
+        """
+        INSERT INTO fitrah
+        (tanggal,jam,nama,alamat,rt,rw,kategori,jiwa,bungkus)
+        VALUES (?,?,?,?,?,?,?,?,?)
+        """,
+        (tanggal,jam,nama,alamat,rt,rw,kategori,jiwa,bungkus)
+        )
 
     conn.commit()
     conn.close()
@@ -77,17 +85,27 @@ def form_maal(request: Request):
 @app.post("/maal")
 def simpan_maal(
     tanggal:str=Form(...),
+    kategori:str=Form(...),
     nama:str=Form(...),
+    alamat:str=Form(...),
+    rt:str=Form(...),
+    rw:str=Form(...),
     jenis:str=Form(...),
     nominal:int=Form(...)
 ):
+
+    jam = datetime.now().strftime("%H:%M")
 
     conn = db()
     cur = conn.cursor()
 
     cur.execute(
-        "INSERT INTO maal (tanggal,nama,jenis,nominal) VALUES (?,?,?,?)",
-        (tanggal,nama,jenis,nominal)
+        """
+        INSERT INTO maal
+        (tanggal,jam,kategori,nama,alamat,rt,rw,jenis,nominal)
+        VALUES (?,?,?,?,?,?,?,?,?)
+        """,
+        (tanggal,jam,kategori,nama,alamat,rt,rw,jenis,nominal)
     )
 
     conn.commit()
@@ -183,6 +201,9 @@ def update_fitrah(
     tanggal:str = Form(...),
     nama:str = Form(...),
     alamat:str = Form(...),
+    rt:str = Form(...),
+    rw:str = Form(...),
+    kategori:str = Form(...),
     jiwa:int = Form(...),
     bungkus:int = Form(...)
 ):
@@ -191,8 +212,12 @@ def update_fitrah(
     cur = conn.cursor()
 
     cur.execute(
-        "UPDATE fitrah SET tanggal=?, nama=?, alamat=?, jiwa=?, bungkus=? WHERE id=?",
-        (tanggal, nama, alamat, jiwa, bungkus, id)
+        """
+        UPDATE fitrah
+        SET tanggal=?, nama=?, alamat=?, rt=?, rw=?, kategori=?, jiwa=?, bungkus=?
+        WHERE id=?
+        """,
+        (tanggal, nama, alamat, rt, rw, kategori, jiwa, bungkus, id)
     )
 
     conn.commit()
@@ -205,6 +230,10 @@ def update_maal(
     id:int,
     tanggal:str = Form(...),
     nama:str = Form(...),
+    alamat:str = Form(...),
+    rt:str = Form(...),
+    rw:str = Form(...),
+    kategori:str = Form(...),
     jenis:str = Form(...),
     nominal:int = Form(...)
 ):
@@ -213,8 +242,12 @@ def update_maal(
     cur = conn.cursor()
 
     cur.execute(
-        "UPDATE maal SET tanggal=?, nama=?, jenis=?, nominal=? WHERE id=?",
-        (tanggal, nama, jenis, nominal, id)
+        """
+        UPDATE maal
+        SET tanggal=?, nama=?, alamat=?, rt=?, rw=?, kategori=?, jenis=?, nominal=?
+        WHERE id=?
+        """,
+        (tanggal, nama, alamat, rt, rw, kategori, jenis, nominal, id)
     )
 
     conn.commit()
@@ -222,162 +255,6 @@ def update_maal(
 
     return RedirectResponse("/laporan", status_code=303)
 
-@app.get("/export")
-def export_excel():
-
-    conn = db()
-    cur = conn.cursor()
-
-    cur.execute("SELECT tanggal,nama,alamat,jiwa,bungkus FROM fitrah ORDER BY id ASC")
-    fitrah = cur.fetchall()
-
-    cur.execute("SELECT tanggal,nama,jenis,nominal FROM maal ORDER BY id ASC")
-    maal = cur.fetchall()
-
-    conn.close()
-
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Laporan Zakat"
-
-    # style
-    header_font = Font(bold=True)
-    title_font = Font(bold=True,size=16)
-    center = Alignment(horizontal="center")
-    fill = PatternFill(start_color="D9EAD3",fill_type="solid")
-
-    border = Border(
-        left=Side(style="thin"),
-        right=Side(style="thin"),
-        top=Side(style="thin"),
-        bottom=Side(style="thin")
-    )
-
-    # judul
-    ws.merge_cells("A1:F1")
-    ws["A1"] = "LAPORAN PENERIMAAN ZAKAT"
-    ws["A1"].font = title_font
-    ws["A1"].alignment = center
-
-    ws.merge_cells("A2:F2")
-    ws["A2"] = "Panitia Zakat"
-    ws["A2"].alignment = center
-    ws.merge_cells("A3:F3")
-    ws["A3"] = "Tanggal Cetak : " + datetime.now().strftime("%d %B %Y")
-    ws["A3"].alignment = center
-
-    # header fitrah
-    row = 4
-    headers = ["No","Tanggal","Nama","Alamat","Jiwa","Bungkus"]
-
-    for col, h in enumerate(headers,1):
-        cell = ws.cell(row=row,column=col,value=h)
-        cell.font = header_font
-        cell.fill = fill
-        cell.border = border
-        cell.alignment = center
-
-    row += 1
-
-    total_jiwa = 0
-    total_bungkus = 0
-
-    for i,x in enumerate(fitrah,start=1):
-
-        ws.cell(row=row,column=1,value=i).border = border
-        ws.cell(row=row,column=2,value=x[0]).border = border
-        ws.cell(row=row,column=3,value=x[1]).border = border
-        ws.cell(row=row,column=4,value=x[2]).border = border
-        ws.cell(row=row,column=5,value=x[3]).border = border
-        ws.cell(row=row,column=6,value=x[4]).border = border
-
-        total_jiwa += x[3]
-        total_bungkus += x[4]
-
-        row += 1
-
-    # total
-    row += 1
-
-    ws.cell(row=row,column=4,value="TOTAL JIWA").font = header_font
-    ws.cell(row=row,column=5,value=total_jiwa)
-
-    row += 1
-
-    ws.cell(row=row,column=4,value="TOTAL BUNGKUS").font = header_font
-    ws.cell(row=row,column=5,value=total_bungkus)
-
-    # tabel maal
-    row += 3
-
-    ws.cell(row=row,column=1,value="ZAKAT MAAL / INFAQ / SHODAQOH").font = header_font
-
-    row += 1
-
-    headers = ["No","Tanggal","Nama","Jenis","Nominal"]
-
-    for col,h in enumerate(headers,1):
-        cell = ws.cell(row=row,column=col,value=h)
-        cell.font = header_font
-        cell.fill = fill
-        cell.border = border
-        cell.alignment = center
-
-    row += 1
-
-    total_uang = 0
-
-    for i,x in enumerate(maal,start=1):
-
-        ws.cell(row=row,column=1,value=i).border = border
-        ws.cell(row=row,column=2,value=x[0]).border = border
-        ws.cell(row=row,column=3,value=x[1]).border = border
-        ws.cell(row=row,column=4,value=x[2]).border = border
-
-        uang = ws.cell(row=row,column=5,value=x[3])
-        uang.number_format = '"Rp "#,##0'
-        uang.border = border
-
-        total_uang += x[3]
-
-        row += 1
-
-    row += 1
-
-    ws.cell(row=row,column=4,value="TOTAL").font = header_font
-
-    total_cell = ws.cell(row=row,column=5,value=total_uang)
-    total_cell.number_format = '"Rp "#,##0'
-
-    # auto width kolom (aman untuk merged cell)
-    for i, col in enumerate(ws.columns, 1):
-
-        max_length = 0
-
-        for cell in col:
-            try:
-                if cell.value:
-                    max_length = max(max_length, len(str(cell.value)))
-            except:
-                pass
-
-        column_letter = get_column_letter(i)
-        ws.column_dimensions[column_letter].width = max_length + 3
-
-        row += 4
-
-    ws.cell(row=row,column=2,value="Mengetahui")
-    ws.cell(row=row,column=5,value="Bendahara")
-
-    row += 3
-
-    ws.cell(row=row,column=2,value="( Ketua Panitia )")
-    ws.cell(row=row,column=5,value="( Bendahara )")
-
-    filename = "laporan_zakat.xlsx"
-    wb.save(filename)
-
-    return FileResponse(filename, filename=filename)
 
 @app.post("/login")
 def login(request: Request, username: str = Form(...), password: str = Form(...)):
@@ -439,26 +316,32 @@ def export_fitrah():
     conn = db()
     cur = conn.cursor()
 
-    cur.execute("SELECT tanggal,nama,alamat,jiwa,bungkus FROM fitrah ORDER BY id ASC")
-    data = cur.fetchall()
+    cur.execute("""
+    SELECT tanggal,jam,nama,alamat,rt,rw,kategori,jiwa,bungkus
+    FROM fitrah
+    ORDER BY rt,rw,nama
+    """)
 
+    data = cur.fetchall()
     conn.close()
 
     wb = load_workbook("ZAKAT FITRAH 2026.xlsx")
     ws = wb.active
 
-    row = 7
+    row = 7  # mulai dari baris data
 
-    for i,x in enumerate(data,start=1):
+    for i, x in enumerate(data, start=1):
 
-        ws.cell(row=row,column=1).value = i
-        ws.cell(row=row,column=2).value = x[0]
-        ws.cell(row=row,column=3).value = datetime.now().strftime("%H:%M")
-        ws.cell(row=row,column=4).value = x[1]
-        ws.cell(row=row,column=5).value = x[2]
-        ws.cell(row=row,column=6).value = "Zakat Fitrah"
-        ws.cell(row=row,column=7).value = x[3]
-        ws.cell(row=row,column=8).value = x[4]
+        ws[f"A{row}"] = i          # No
+        ws[f"B{row}"] = x[0]       # tanggal
+        ws[f"C{row}"] = x[1]       # jam
+        ws[f"D{row}"] = x[2]       # nama
+        ws[f"E{row}"] = x[3]       # alamat
+        ws[f"F{row}"] = x[4]       # rt
+        ws[f"G{row}"] = x[5]       # rw
+        ws[f"H{row}"] = x[6]       # kategori
+        ws[f"I{row}"] = x[7]       # jiwa
+        ws[f"J{row}"] = x[8]       # beras
 
         row += 1
 
@@ -466,10 +349,10 @@ def export_fitrah():
     wb.save(file)
 
     return FileResponse(
-    file,
-    media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    filename="laporan_fitrah.xlsx"
-)
+        file,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        filename=file
+    )
 
 @app.get("/export_maal")
 def export_maal():
@@ -477,9 +360,13 @@ def export_maal():
     conn = db()
     cur = conn.cursor()
 
-    cur.execute("SELECT tanggal,nama,jenis,nominal FROM maal ORDER BY id ASC")
-    data = cur.fetchall()
+    cur.execute("""
+    SELECT tanggal,jam,nama,alamat,rt,rw,kategori,jenis,nominal
+    FROM maal
+    ORDER BY rt,rw,nama
+    """)
 
+    data = cur.fetchall()
     conn.close()
 
     wb = load_workbook("ZAKAT MAAL_INFAQ_SHODAQOH 2026.xlsx")
@@ -489,14 +376,16 @@ def export_maal():
 
     for i,x in enumerate(data,start=1):
 
-        ws.cell(row=row,column=1).value = i
-        ws.cell(row=row,column=2).value = x[0]
-        ws.cell(row=row,column=3).value = datetime.now().strftime("%H:%M")
-        ws.cell(row=row,column=4).value = x[1]
-        ws.cell(row=row,column=5).value = ""
-        ws.cell(row=row,column=6).value = "Zakat"
-        ws.cell(row=row,column=7).value = x[2]
-        ws.cell(row=row,column=8).value = x[3]
+        ws[f"A{row}"] = i
+        ws[f"B{row}"] = x[0]   # tanggal
+        ws[f"C{row}"] = x[1]   # jam
+        ws[f"D{row}"] = x[2]   # nama
+        ws[f"E{row}"] = x[3]   # alamat
+        ws[f"F{row}"] = x[4]   # rt
+        ws[f"G{row}"] = x[5]   # rw
+        ws[f"H{row}"] = x[6]   # kategori
+        ws[f"I{row}"] = x[7]   # jenis
+        ws[f"J{row}"] = x[8]   # nominal
 
         row += 1
 
@@ -504,8 +393,142 @@ def export_maal():
     wb.save(file)
 
     return FileResponse(
-    file,
-    media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    filename="laporan_maal.xlsx"
-)
+        file,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        filename=file
+    )
 
+@app.get("/audit_beras")
+def audit_beras(request: Request):
+
+    if not request.session.get("user"):
+        return RedirectResponse("/login", status_code=303)
+
+    conn = db()
+    cur = conn.cursor()
+
+    cur.execute("SELECT SUM(jiwa) FROM fitrah")
+    total_jiwa = cur.fetchone()[0] or 0
+
+    cur.execute("SELECT SUM(bungkus) FROM fitrah")
+    total_beras = cur.fetchone()[0] or 0
+
+    cur.execute("SELECT COUNT(*) FROM fitrah")
+    total_transaksi = cur.fetchone()[0]
+
+    conn.close()
+
+    return templates.TemplateResponse(
+        "audit_beras.html",
+        {
+            "request": request,
+            "total_jiwa": total_jiwa,
+            "total_beras": total_beras,
+            "total_transaksi": total_transaksi
+        }
+    )
+
+@app.get("/audit_uang")
+def audit_uang(request: Request):
+
+    if not request.session.get("user"):
+        return RedirectResponse("/login", status_code=303)
+
+    conn = db()
+    cur = conn.cursor()
+
+    cur.execute("SELECT SUM(nominal) FROM maal WHERE jenis='Zakat Maal'")
+    zakat = cur.fetchone()[0] or 0
+
+    cur.execute("SELECT SUM(nominal) FROM maal WHERE jenis='Infaq'")
+    infaq = cur.fetchone()[0] or 0
+
+    cur.execute("SELECT SUM(nominal) FROM maal WHERE jenis='Shodaqoh'")
+    shodaqoh = cur.fetchone()[0] or 0
+
+    total = zakat + infaq + shodaqoh
+
+    conn.close()
+
+    return templates.TemplateResponse(
+        "audit_uang.html",
+        {
+            "request": request,
+            "zakat": zakat,
+            "infaq": infaq,
+            "shodaqoh": shodaqoh,
+            "total": total
+        }
+    )
+
+
+@app.get("/penyaluran")
+def penyaluran(request: Request):
+
+    if not request.session.get("user"):
+        return RedirectResponse("/login", status_code=303)
+
+    conn = db()
+    cur = conn.cursor()
+
+    # total beras masuk dari zakat fitrah
+    cur.execute("SELECT SUM(bungkus) FROM fitrah")
+    total_beras = cur.fetchone()[0] or 0
+
+    # total uang zakat maal
+    cur.execute("SELECT SUM(nominal) FROM maal")
+    total_uang = cur.fetchone()[0] or 0
+
+    # total beras yang sudah disalurkan
+    cur.execute("SELECT SUM(beras) FROM penyaluran")
+    total_disalurkan = cur.fetchone()[0] or 0
+
+    # sisa beras
+    sisa_beras = total_beras - total_disalurkan
+
+    # data penerima zakat
+    cur.execute("SELECT * FROM penyaluran ORDER BY id DESC")
+    data_penyaluran = cur.fetchall()
+
+    conn.close()
+
+    return templates.TemplateResponse(
+        "penyaluran.html",
+        {
+            "request": request,
+            "total_beras": total_beras,
+            "total_uang": total_uang,
+            "total_disalurkan": total_disalurkan,
+            "sisa_beras": sisa_beras,
+            "penyaluran": data_penyaluran
+        }
+    )
+
+
+@app.post("/penyaluran")
+def simpan_penyaluran(
+    tanggal:str=Form(...),
+    nama:str=Form(...),
+    alamat:str=Form(...),
+    rt:str=Form(...),
+    rw:str=Form(...),
+    kategori:str=Form(...),
+    beras:int=Form(...)
+):
+
+    conn = db()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        INSERT INTO penyaluran
+        (tanggal,nama,alamat,rt,rw,kategori,beras)
+        VALUES (?,?,?,?,?,?,?)
+        """,
+        (tanggal,nama,alamat,rt,rw,kategori,beras)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return RedirectResponse("/penyaluran", status_code=303) 

@@ -17,6 +17,140 @@ font-size:13px;
 }
 </style>
 
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+/* =======================
+   SET TANGGAL OTOMATIS
+======================= */
+
+let now = new Date();
+let year = now.getFullYear();
+let month = String(now.getMonth() + 1).padStart(2,'0');
+let day = String(now.getDate()).padStart(2,'0');
+
+let today = year + "-" + month + "-" + day;
+
+let tanggal = document.getElementById("tanggal");
+
+if(tanggal){
+tanggal.value = today;
+}
+
+
+/* =======================
+   AUTO FOCUS NAMA
+======================= */
+
+let nama = document.getElementById("nama");
+
+if(nama){
+nama.focus();
+}
+
+
+/* =======================
+   TOAST SUCCESS
+======================= */
+
+const urlParams = new URLSearchParams(window.location.search);
+
+if(urlParams.get('success') === '1'){
+
+let toastElement = document.getElementById("successToast");
+
+let toast = new bootstrap.Toast(toastElement,{
+delay:3000
+});
+
+toast.show();
+
+window.history.replaceState({}, document.title, window.location.pathname);
+
+}
+
+
+/* =======================
+   ALAMAT SELECT
+======================= */
+
+const alamatSelect = document.getElementById("alamatSelect");
+const manualAlamat = document.getElementById("manualAlamat");
+
+if(alamatSelect){
+
+alamatSelect.addEventListener("change", function(){
+
+if(alamatSelect.value === "lainnya"){
+
+manualAlamat.style.display = "block";
+
+}else{
+
+manualAlamat.style.display = "none";
+
+}
+
+});
+
+}
+
+
+/* =======================
+   JIWA SELECT
+======================= */
+
+const jiwaSelect = document.getElementById("jiwaSelect");
+const manualJiwa = document.getElementById("manualJiwa");
+
+if(jiwaSelect){
+
+jiwaSelect.addEventListener("change", function(){
+
+if(jiwaSelect.value === "lainnya"){
+
+manualJiwa.style.display = "block";
+
+}else{
+
+manualJiwa.style.display = "none";
+
+}
+
+});
+
+}
+
+
+/* =======================
+   BUNGKUS SELECT
+======================= */
+
+const bungkusSelect = document.getElementById("bungkusSelect");
+const manualBungkus = document.getElementById("manualBungkus");
+
+if(bungkusSelect){
+
+bungkusSelect.addEventListener("change", function(){
+
+if(bungkusSelect.value === "lainnya"){
+
+manualBungkus.style.display = "block";
+
+}else{
+
+manualBungkus.style.display = "none";
+
+}
+
+});
+
+}
+
+});
+
+</script>
+
 </head>
 
 
@@ -43,54 +177,152 @@ Masjid Daarul Muttaqin
 
 </div>
 
-<div class="container mt-4">
-    
+<div class="container mt-4"> 
 <h3 class="mb-4">Input Zakat Fitrah</h3>
 
-<div class="card">
-<div class="card-body">
+    <div class="card">
+        <div class="card-body">
+        <div id="alertBox"></div> 
+
+            <form method="post">
+
+                <div class="mb-3">
+                    <label class="form-label">Tanggal</label>
+                    <input type="date" class="form-control" name="tanggal" id="tanggal" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Kategori</label>
+                        <select class="form-control" name="kategori">
+                            <option value="perorangan">Perorangan</option>
+                            <option value="instansi">Instansi</option>
+                        </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nama Kepala Keluarga</label>
+                    <input type="text" class="form-control" name="nama" id="nama" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Alamat</label>
+                    <select name="alamat" id="alamatSelect" class="form-select">
+                        <option value="Ajibarang Wetan">Ajibarang Wetan</option>
+                        <option value="Ajibarang Kulon">Ajibarang Kulon</option>
+                        <option value="lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div class="mb-3" id="manualAlamat" style="display:none;">
+                        <label class="form-label">Alamat Manual</label>
+                        <input
+                        type="text"
+                        class="form-control"
+                        name="alamat_manual"
+                        placeholder="Masukkan alamat">
+                </div>
+                    <div class="mb-3">
+                    <label class="form-label">RT</label>
+                        <select class="form-select" name="rt" required>
     
-<div id="alertBox"></div> 
-
-<form method="post">
-
-<div class="mb-3">
-    <label class="form-label">Tanggal</label>
-<input type="date" class="form-control" name="tanggal" id="tanggal" required>
-</div>
-
-<div class="mb-3">
-<label class="form-label">Nama Kepala Keluarga</label>
-<input type="text" class="form-control" name="nama" id="nama" required>
-</div>
-
-<div class="mb-3">
-<label class="form-label">Alamat</label>
-<input type="text" class="form-control" name="alamat" required>
-</div>
-
-<div class="mb-3">
-<label class="form-label">Jumlah Jiwa</label>
-<input type="number" class="form-control" name="jiwa" required>
-</div>
-
-<div class="mb-3">
-    <label class="form-label">Jumlah Bungkus Beras</label>
-<input type="number" class="form-control" name="bungkus" required>
-</div>
-
-<button type="submit" class="btn btn-primary w-100 mb-2">
-Simpan
-</button>
-
-<a href="/" class="btn btn-secondary w-100">
-Kembali
-</a>
-
-</form>
-
-</div>
-</div>
+                            <option value="">Pilih RT</option>
+    
+                            <option value="01">01</option>
+                            <option value="02">02</option>
+                            <option value="03">03</option>
+                            <option value="04">04</option>
+                            <option value="05">05</option>
+                            <option value="06">06</option>
+                            <option value="07">07</option>
+                            <option value="08">08</option>
+                            <option value="09">09</option>
+                            <option value="10">10</option>
+    
+                        </select>
+                    </div>
+    
+                    <div class="mb-3">
+                        <label class="form-label">RW</label>
+                        <select class="form-select" name="rw" required>
+    
+                            <option value="">Pilih RW</option>
+    
+                            <option value="01">01</option>
+                            <option value="02">02</option>
+                            <option value="03">03</option>
+                            <option value="04">04</option>
+                            <option value="05">05</option>
+                            <option value="06">06</option>
+                            <option value="07">07</option>
+                            <option value="08">08</option>
+                            <option value="09">09</option>
+                            <option value="10">10</option>
+    
+                        </select>
+                    </div>
+    
+                    <div class="mb-3">
+                        <label class="form-label">Jumlah Jiwa</label>
+                        <select class="form-select" name="jiwa" id="jiwaSelect">
+    
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="lainnya">Lainnya</option>
+    
+                        </select>
+                    </div>
+                    <div class="mb-3" id="manualJiwa" style="display:none;">
+                        <label class="form-label">Jumlah Jiwa Manual</label>
+                        <input
+                        type="number"
+                        class="form-control"
+                        name="jiwa_manual"
+                        placeholder="Masukkan jumlah jiwa">
+                </div>
+    
+                    <div class="mb-3">
+                        <label class="form-label">Jumlah Bungkus</label>
+                        <select class="form-select" name="bungkus" id="bungkusSelect">
+    
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="lainnya">Lainnya</option>
+    
+                        </select>
+                    </div>
+                    <div class="mb-3" id="manualBungkus" style="display:none;">
+                        <label class="form-label">Jumlah Bungkus Manual</label>
+                        <input
+                        type="number"
+                        class="form-control"
+                        name="bungkus_manual"
+                        placeholder="Masukkan jumlah bungkus">
+                </div>
+    
+                <button type="submit" class="btn btn-primary w-100 mb-2">
+                Simpan
+                </button>
+    
+                <a href="/" class="btn btn-secondary w-100">
+                Kembali
+                </a>
+    
+                </form>
+            </div>
+       
+        </div>
+    </div>
 
 </div>
 

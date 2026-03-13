@@ -66,9 +66,90 @@ background:white;
 border-top:1px solid rgba(0,0,0,0.05);
 font-size:13px;
 }
+
+#searchResult{
+max-height:300px;
+overflow-y:auto;
+}
 </style>
 
 <script>
+
+function cariData(){
+
+let keyword = document.getElementById("searchInput").value.toLowerCase()
+
+let rows = document.querySelectorAll("#tableFitrah tbody tr")
+
+let hasil = document.getElementById("searchResult")
+
+hasil.innerHTML = ""
+
+if(keyword === ""){
+hasil.style.display = "none"
+return
+}
+
+hasil.style.display = "block"
+
+let ditemukan = false
+
+rows.forEach(function(row){
+
+let nama = row.children[3].textContent.toLowerCase()
+let alamat = row.children[4].textContent.toLowerCase()
+
+if(nama.includes(keyword) || alamat.includes(keyword)){
+
+ditemukan = true
+
+let namaAsli = row.children[3].textContent
+let alamatAsli = row.children[4].textContent
+let jiwa = row.children[8].textContent
+
+let item = document.createElement("a")
+
+item.className = "list-group-item list-group-item-action"
+
+item.innerText = namaAsli + " — " + alamatAsli + " (" + jiwa + " jiwa)"
+
+item.onclick = function(){
+
+row.scrollIntoView({
+behavior: "smooth",
+block: "center"
+})
+
+row.style.background = "#fff3cd"
+
+setTimeout(()=>{
+row.style.background = ""
+},2000)
+
+hasil.innerHTML = ""
+hasil.style.display = "none"
+
+}
+
+hasil.appendChild(item)
+
+}
+
+})
+
+if(!ditemukan){
+
+let kosong = document.createElement("div")
+
+kosong.className = "list-group-item text-muted"
+
+kosong.innerText = "Data tidak ditemukan"
+
+hasil.appendChild(kosong)
+
+}
+
+}
 
 let pageFitrah = 1
 let pageMaal = 1
@@ -204,7 +285,7 @@ Desa Ajibarang Wetan RT 02 RW 01
 Total Jiwa Zakat Fitrah  
 <b>{{ total_jiwa }}</b>
 
-<br><br>
+<br>
 
 Total Bungkus Beras  
 <b>{{ total_bungkus }}</b>
@@ -265,14 +346,21 @@ Total Keseluruhan
     
     <h5>Zakat Fitrah</h5>
     
+    <div class="position-relative mb-3">
+
     <input
     type="text"
     id="searchInput"
-    class="form-control mb-3"
+    class="form-control"
     placeholder="Cari nama..."
     onkeyup="cariData()"
     >
-    <div id="searchResult" class="list-group position-absolute w-100"></div>
+
+    <div id="searchResult"
+    class="list-group position-absolute shadow"
+    style="width:100%; z-index:1000;"></div>
+
+    </div>
     
     <div class="table-responsive">
         
@@ -284,10 +372,14 @@ Total Keseluruhan
     
     <th>No</th>
     <th>Tanggal</th>
+    <th>Jam</th>
     <th>Nama</th>
     <th>Alamat</th>
+    <th>RT</th>
+    <th>RW</th>
+    <th>Kategori</th>
     <th>Jiwa</th>
-    <th>Bungkus</th>
+    <th>Beras</th>
     <th>Aksi</th>
     
 </tr>
@@ -301,11 +393,15 @@ Total Keseluruhan
     <tr>
         
         <td>{{ loop.index }}</td>
-        <td>{{x[1]}}</td>
-        <td>{{x[2]}}</td>
-        <td>{{x[3]}}</td>
-        <td>{{x[4]}}</td>
-        <td>{{x[5]}}</td>
+        <td>{{x[1]}}</td>  <!-- tanggal -->
+        <td>{{x[2]}}</td>  <!-- jam -->
+        <td>{{x[4]}}</td>  <!-- nama -->
+        <td>{{x[5]}}</td>  <!-- alamat -->
+        <td>{{x[6]}}</td>  <!-- rt -->
+        <td>{{x[7]}}</td>  <!-- rw -->
+        <td>{{x[3]}}</td>  <!-- kategori -->
+        <td>{{x[8]}}</td>  <!-- jiwa -->
+        <td>{{x[9]}}</td>  <!-- bungkus -->
         
         <td>
             
@@ -359,12 +455,17 @@ Hapus
 
             <tr>
                 
-<th>No</th>
-<th>Tanggal</th>
-<th>Nama</th>
-<th>Jenis</th>
-<th>Nominal</th>
-<th>Aksi</th>
+    <th>No</th>
+    <th>Tanggal</th>
+    <th>Jam</th>
+    <th>Nama</th>
+    <th>Alamat</th>
+    <th>RT</th>
+    <th>RW</th>
+    <th>Kategori</th>
+    <th>Jenis</th>
+    <th>Nominal</th>
+    <th>Aksi</th>
 
 </tr>
 
@@ -372,35 +473,43 @@ Hapus
 
 <tbody>
 
-    {% for x in maal %}
-    
-    <tr>
-        
-        <td>{{ loop.index }}</td>
-        <td>{{x[1]}}</td>
-        <td>{{x[2]}}</td>
-        <td>
-            
-{% if x[3] == "Zakat Maal" %}
+{% for x in maal %}
+
+<tr>
+
+<td>{{ loop.index }}</td>
+
+<td>{{x[1]}}</td>
+<td>{{x[2]}}</td>
+<td>{{x[4]}}</td>
+<td>{{x[5]}}</td>
+<td>{{x[6]}}</td>
+<td>{{x[7]}}</td>
+<td>{{x[3]}}</td>
+
+<td>
+{% if x[8] == "Zakat Maal" %}
 <span class="badge bg-primary">Zakat Maal</span>
 
-{% elif x[3] == "Infaq" %}
+{% elif x[8] == "Infaq" %}
 <span class="badge bg-success">Infaq</span>
 
-{% elif x[3] == "Shodaqoh" %}
+{% elif x[8] == "Shodaqoh" %}
 <span class="badge bg-warning text-dark">Shodaqoh</span>
 
 {% else %}
-<span class="badge bg-secondary">{{x[3]}}</span>
+<span class="badge bg-secondary">{{x[8]}}</span>
 {% endif %}
-
 </td>
-<td>Rp {{ "{:,.0f}".format(x[4]).replace(",",".") }}</td>
 
 <td>
-    
-    <button
-    class="btn btn-warning btn-sm"
+Rp {{ "{:,.0f}".format(x[9]).replace(",",".") }}
+</td>
+
+<td>
+
+<button
+class="btn btn-warning btn-sm"
 data-bs-toggle="modal"
 data-bs-target="#editMaal{{x[0]}}">
 Edit
@@ -448,47 +557,70 @@ Hapus
 {% for x in fitrah %}
 
 <div class="modal fade" id="editFitrah{{x[0]}}">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            
+<div class="modal-dialog">
+<div class="modal-content">
+
 <div class="modal-header">
-    <h5>Edit Zakat Fitrah</h5>
-    <button class="btn-close" data-bs-dismiss="modal"></button>
+<h5>Edit Zakat Fitrah</h5>
+<button class="btn-close" data-bs-dismiss="modal"></button>
 </div>
 
 <form method="post" action="/edit_fitrah/{{x[0]}}">
-    
-    <div class="modal-body">
-        
-        <label>Tanggal</label>
+
+<div class="modal-body">
+
+<label>Tanggal</label>
 <input class="form-control" type="date" name="tanggal" value="{{x[1]}}" required>
 
 <br>
 
 <label>Nama</label>
-<input class="form-control" type="text" name="nama" value="{{x[2]}}" required>
+<input class="form-control" type="text" name="nama" value="{{x[4]}}" required>
 
 <br>
 
 <label>Alamat</label>
-<input class="form-control" type="text" name="alamat" value="{{x[3]}}" required>
+<input class="form-control" type="text" name="alamat" value="{{x[5]}}" required>
 
 <br>
 
-<label>Jiwa</label>
-<input class="form-control" type="number" name="jiwa" value="{{x[4]}}" required>
+<label>RT</label>
+<input class="form-control" type="text" name="rt" value="{{x[6]}}" required>
 
 <br>
 
-<label>Bungkus</label>
-<input class="form-control" type="number" name="bungkus" value="{{x[5]}}" required >
+<label>RW</label>
+<input class="form-control" type="text" name="rw" value="{{x[7]}}" required>
+
+<br>
+
+<label>Kategori</label>
+<select class="form-control" name="kategori">
+
+<option value="perorangan" {% if x[3]=='perorangan' %}selected{% endif %}>
+Perorangan
+</option>
+
+<option value="instansi" {% if x[3]=='instansi' %}selected{% endif %}>
+Instansi
+</option>
+
+</select>
+
+<br>
+
+<label>Jumlah Jiwa</label>
+<input class="form-control" type="number" name="jiwa" value="{{x[8]}}" required>
+
+<br>
+
+<label>Jumlah Beras</label>
+<input class="form-control" type="number" name="bungkus" value="{{x[9]}}" required>
 
 </div>
 
 <div class="modal-footer">
-    
-    <button class="btn btn-primary">Update</button>
-    
+<button class="btn btn-primary">Update</button>
 </div>
 
 </form>
@@ -502,9 +634,9 @@ Hapus
 {% for x in maal %}
 
 <div class="modal fade" id="editMaal{{x[0]}}">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            
+<div class="modal-dialog">
+<div class="modal-content">
+
 <div class="modal-header">
 <h5>Edit Zakat Maal</h5>
 <button class="btn-close" data-bs-dismiss="modal"></button>
@@ -512,47 +644,74 @@ Hapus
 
 <form method="post" action="/edit_maal/{{x[0]}}">
 
-    <div class="modal-body">
-        
+<div class="modal-body">
+
 <label>Tanggal</label>
 <input class="form-control" type="date" name="tanggal" value="{{x[1]}}" required>
 
 <br>
 
 <label>Nama</label>
-<input class="form-control" type="text" name="nama" value="{{x[2]}}" required>
+<input class="form-control" type="text" name="nama" value="{{x[4]}}" required>
+
+<br>
+
+<label>Alamat</label>
+<input class="form-control" type="text" name="alamat" value="{{x[5]}}" required>
+
+<br>
+
+<label>RT</label>
+<input class="form-control" type="text" name="rt" value="{{x[6]}}" required>
+
+<br>
+
+<label>RW</label>
+<input class="form-control" type="text" name="rw" value="{{x[7]}}" required>
+
+<br>
+
+<label>Kategori</label>
+<select class="form-control" name="kategori">
+
+<option value="perorangan" {% if x[3]=='perorangan' %}selected{% endif %}>
+Perorangan
+</option>
+
+<option value="instansi" {% if x[3]=='instansi' %}selected{% endif %}>
+Instansi
+</option>
+
+</select>
 
 <br>
 
 <label>Jenis</label>
-
 <select class="form-control" name="jenis">
-    
-    <option value="Zakat Maal" {% if x[3]=='Zakat Maal' %}selected{% endif %}>
-        Zakat Maal
-    </option>
-    
-    <option value="Infaq" {% if x[3]=='Infaq' %}selected{% endif %}>
-        Infaq
-    </option>
 
-    <option value="Shodaqoh" {% if x[3]=='Shodaqoh' %}selected{% endif %}>
-        Shodaqoh
-    </option>
+<option value="Zakat Maal" {% if x[8]=='Zakat Maal' %}selected{% endif %}>
+Zakat Maal
+</option>
+
+<option value="Infaq" {% if x[8]=='Infaq' %}selected{% endif %}>
+Infaq
+</option>
+
+<option value="Shodaqoh" {% if x[8]=='Shodaqoh' %}selected{% endif %}>
+Shodaqoh
+</option>
 
 </select>
 
 <br>
 
 <label>Nominal</label>
-<input class="form-control" type="number" name="nominal" value="{{x[4]}}" required>
+<input class="form-control" type="number" name="nominal" value="{{x[9]}}" required>
 
 </div>
 
 <div class="modal-footer">
-    
-    <button class="btn btn-primary">Update</button>
-    
+<button class="btn btn-primary">Update</button>
 </div>
 
 </form>
@@ -566,53 +725,59 @@ Hapus
 <script>
     
     function cariData(){
-        
-        let keyword = document.getElementById("searchInput").value.toLowerCase()
-        
-        let rows = document.querySelectorAll("#tableFitrah tbody tr")
-        
-        let hasil = document.getElementById("searchResult")
-        
+
+let keyword = document.getElementById("searchInput").value.toLowerCase()
+
+let rows = document.querySelectorAll("#tableFitrah tbody tr")
+let hasil = document.getElementById("searchResult")
+
 hasil.innerHTML=""
 
 if(keyword===""){
-    return
+
+rows.forEach(row=>{
+row.style.display=""
+})
+
+hasil.style.display="none"
+showPageFitrah(1)
+
+return
 }
+
+hasil.style.display="block"
 
 let ditemukan=false
 
 rows.forEach(function(row){
 
-    let nama=row.children[2].textContent.toLowerCase()
-    
-    if(nama.includes(keyword)){
+let nama=row.children[3].textContent.toLowerCase()
+let alamat=row.children[4].textContent.toLowerCase()
 
-    ditemukan=true
-    
-    let namaAsli=row.children[2].textContent
-    let alamat=row.children[3].textContent
-    let jiwa=row.children[4].textContent
-    
-    let item=document.createElement("a")
-    
-    item.className="list-group-item list-group-item-action"
-    
-    item.innerText=namaAsli+" — "+alamat+" ("+jiwa+" jiwa)"
-    
-    item.onclick=function(){
-        
-row.scrollIntoView({
-    behavior:"smooth",
-    block:"center"
+if(nama.includes(keyword) || alamat.includes(keyword)){
+
+ditemukan=true
+
+let namaAsli=row.children[3].textContent
+let alamatAsli=row.children[4].textContent
+let jiwa=row.children[8].textContent
+
+let item=document.createElement("a")
+
+item.className="list-group-item list-group-item-action"
+
+item.innerText=namaAsli+" — "+alamatAsli+" ("+jiwa+" jiwa)"
+
+item.onclick=function(){
+
+rows.forEach(r=>{
+r.style.display="none"
 })
 
-row.style.background="#fff3cd"
-
-setTimeout(()=>{
-    row.style.background=""
-},2000)
+row.style.display=""
 
 hasil.innerHTML=""
+hasil.style.display="none"
 
 }
 
@@ -628,14 +793,13 @@ let kosong=document.createElement("div")
 
 kosong.className="list-group-item text-muted"
 
-kosong.innerText="Data tidak ada"
+kosong.innerText="Data tidak ditemukan"
 
 hasil.appendChild(kosong)
 
 }
 
 }
-
 </script>
 
 </body>
