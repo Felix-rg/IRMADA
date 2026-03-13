@@ -328,7 +328,7 @@ def export_fitrah():
     wb = load_workbook("ZAKAT FITRAH 2026.xlsx")
     ws = wb.active
 
-    row = 7  # mulai dari baris data
+    row = 6  # mulai dari baris data
 
     for i, x in enumerate(data, start=1):
 
@@ -372,7 +372,7 @@ def export_maal():
     wb = load_workbook("ZAKAT MAAL_INFAQ_SHODAQOH 2026.xlsx")
     ws = wb.active
 
-    row = 7
+    row = 6
 
     for i,x in enumerate(data,start=1):
 
