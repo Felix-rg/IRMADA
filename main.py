@@ -1,8 +1,9 @@
 from datetime import datetime
+import io
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, Request, Form
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 from openpyxl import load_workbook
 from fastapi.responses import RedirectResponse
 from fastapi.responses import RedirectResponse
@@ -50,9 +51,11 @@ def simpan_fitrah(
     jam = datetime.now().strftime("%H:%M"),
     kategori:str=Form(...),
     nama:str=Form(...),
+    nik:str=Form(...),
     alamat:str=Form(...),
     rt:str=Form(...),
     rw:str=Form(...),
+    kecamatan:str=Form(...),
     jiwa:int=Form(...),
     bungkus:int=Form(...)
 ):
@@ -63,10 +66,10 @@ def simpan_fitrah(
     cur.execute(
         """
         INSERT INTO fitrah
-        (tanggal,jam,nama,alamat,rt,rw,kategori,jiwa,bungkus)
-        VALUES (?,?,?,?,?,?,?,?,?)
+        (tanggal,jam,nama,nik,alamat,rt,rw,kecamatan,kategori,jiwa,bungkus)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?)
         """,
-        (tanggal,jam,nama,alamat,rt,rw,kategori,jiwa,bungkus)
+        (tanggal,jam,nama,nik,alamat,rt,rw,kecamatan,kategori,jiwa,bungkus)
         )
 
     conn.commit()
@@ -85,11 +88,14 @@ def form_maal(request: Request):
 @app.post("/maal")
 def simpan_maal(
     tanggal:str=Form(...),
+    jam = datetime.now().strftime("%H:%M"),
     kategori:str=Form(...),
     nama:str=Form(...),
+    nik:str=Form(...),
     alamat:str=Form(...),
     rt:str=Form(...),
     rw:str=Form(...),
+    kecamatan:str=Form(...),
     jenis:str=Form(...),
     nominal:int=Form(...)
 ):
@@ -102,10 +108,10 @@ def simpan_maal(
     cur.execute(
         """
         INSERT INTO maal
-        (tanggal,jam,kategori,nama,alamat,rt,rw,jenis,nominal)
-        VALUES (?,?,?,?,?,?,?,?,?)
+        (tanggal,jam,kategori,nama,nik,alamat,rt,rw,kecamatan,jenis,nominal)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?)
         """,
-        (tanggal,jam,kategori,nama,alamat,rt,rw,jenis,nominal)
+        (tanggal,jam,kategori,nama,nik,alamat,rt,rw,kecamatan,jenis,nominal)
     )
 
     conn.commit()
@@ -317,31 +323,33 @@ def export_fitrah():
     cur = conn.cursor()
 
     cur.execute("""
-    SELECT tanggal,jam,nama,alamat,rt,rw,kategori,jiwa,bungkus
+    SELECT nama, nik, alamat, rt, rw, kecamatan, jiwa, bungkus
     FROM fitrah
-    ORDER BY rt,rw,nama
+    ORDER BY rt, rw, nama
     """)
-
     data = cur.fetchall()
     conn.close()
 
-    wb = load_workbook("ZAKAT FITRAH 2026.xlsx")
+    wb = load_workbook("LAPORAN_FITRAH2026.xlsx")
     ws = wb.active
 
-    row = 6  # mulai dari baris data
+    row = 5  # sesuaikan sama template lu
+    BERAT_PER_BUNGKUS = 3
 
     for i, x in enumerate(data, start=1):
 
-        ws[f"A{row}"] = i          # No
-        ws[f"B{row}"] = x[0]       # tanggal
-        ws[f"C{row}"] = x[1]       # jam
-        ws[f"D{row}"] = x[2]       # nama
-        ws[f"E{row}"] = x[3]       # alamat
-        ws[f"F{row}"] = x[4]       # rt
-        ws[f"G{row}"] = x[5]       # rw
-        ws[f"H{row}"] = x[6]       # kategori
-        ws[f"I{row}"] = x[7]       # jiwa
-        ws[f"J{row}"] = x[8]       # beras
+        jumlah_bungkus = x[7]
+        jumlah_kg = jumlah_bungkus * BERAT_PER_BUNGKUS
+
+        ws[f"A{row}"] = i          # NO
+        ws[f"B{row}"] = x[0]       # NAMA
+        ws[f"C{row}"] = x[1]       # NIK
+        ws[f"D{row}"] = x[2]       # DESA (pakai alamat dulu)
+        ws[f"E{row}"] = x[3]       # RT
+        ws[f"F{row}"] = x[4]       # RW
+        ws[f"G{row}"] = x[5]       # KECAMATAN
+        ws[f"H{row}"] = x[6]       # JIWA
+        ws[f"I{row}"] = jumlah_kg  # KG
 
         row += 1
 
@@ -480,7 +488,7 @@ def penyaluran(request: Request):
     total_uang = cur.fetchone()[0] or 0
 
     # total beras yang sudah disalurkan
-    cur.execute("SELECT SUM(beras) FROM penyaluran")
+    cur.execute("SELECT SUM(jumlah_bungkus) FROM penyaluran")
     total_disalurkan = cur.fetchone()[0] or 0
 
     # sisa beras
@@ -507,28 +515,142 @@ def penyaluran(request: Request):
 
 @app.post("/penyaluran")
 def simpan_penyaluran(
-    tanggal:str=Form(...),
-    nama:str=Form(...),
-    alamat:str=Form(...),
-    rt:str=Form(...),
-    rw:str=Form(...),
-    kategori:str=Form(...),
-    beras:int=Form(...)
+    tanggal: str = Form(...),
+    nama: str = Form(...),
+    nik: str = Form(""),
+    alamat: str = Form(...),
+    alamat_manual: str = Form(""),
+    rt: str = Form(...),
+    rw: str = Form(...),
+    kecamatan: str = Form(""),
+    jumlah_bungkus: int = Form(...),
 ):
+    # kalau pilih "lainnya"
+    if alamat == "lainnya" and alamat_manual:
+        alamat = alamat_manual
 
     conn = db()
     cur = conn.cursor()
 
-    cur.execute(
-        """
+    cur.execute("""
         INSERT INTO penyaluran
-        (tanggal,nama,alamat,rt,rw,kategori,beras)
-        VALUES (?,?,?,?,?,?,?)
-        """,
-        (tanggal,nama,alamat,rt,rw,kategori,beras)
-    )
+        (tanggal, nama, nik, alamat, rt, rw, kecamatan, jumlah_bungkus, tanda_tangan)
+        VALUES (?,?,?,?,?,?,?,?,?)
+    """, (
+        tanggal,
+        nama,
+        nik,
+        alamat,
+        rt,
+        rw,
+        kecamatan,
+        jumlah_bungkus,
+        ""  # tanda tangan kosong dulu
+    ))
 
     conn.commit()
     conn.close()
 
-    return RedirectResponse("/penyaluran", status_code=303) 
+    return RedirectResponse("/penyaluran?success=1", status_code=303)  
+
+@app.get("/hapus_penyaluran/{id}")
+def hapus_penyaluran(id: int):
+    conn = db()
+    cur = conn.cursor()
+
+    cur.execute("DELETE FROM penyaluran WHERE id=?", (id,))
+
+    conn.commit()
+    conn.close()
+
+    return RedirectResponse("/penyaluran", status_code=303)
+
+from fastapi import Form
+
+@app.post("/edit_penyaluran/{id}")
+def edit_penyaluran(
+    id: int,
+    tanggal: str = Form(...),
+    nama: str = Form(...),
+    nik: str = Form(""),
+    alamat: str = Form(...),
+    rt: str = Form(...),
+    rw: str = Form(...),
+    kecamatan: str = Form(""),
+    jumlah_bungkus: int = Form(...)
+):
+    conn = db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        UPDATE penyaluran SET
+        tanggal=?,
+        nama=?,
+        nik=?,
+        alamat=?,
+        rt=?,
+        rw=?,
+        kecamatan=?,
+        jumlah_bungkus=?
+        WHERE id=?
+    """, (
+        tanggal,
+        nama,
+        nik,
+        alamat,
+        rt,
+        rw,
+        kecamatan,
+        jumlah_bungkus,
+        id
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return RedirectResponse("/penyaluran", status_code=303)
+
+@app.get("/export_penyaluran")
+def export_penyaluran():
+    conn = db()
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM penyaluran")
+    data = cur.fetchall()
+
+    conn.close()
+
+    # load template
+    wb = load_workbook("PENYALURAN.xlsx")
+    ws = wb.active
+
+    start_row = 5  # mulai dari baris 5
+
+    for i, row in enumerate(data, start=0):
+        excel_row = start_row + i
+
+        ws.cell(row=excel_row, column=1, value=i + 1)        # NO
+        ws.cell(row=excel_row, column=2, value=row[2])       # NAMA
+        ws.cell(row=excel_row, column=3, value=row[3])       # NIK
+        ws.cell(row=excel_row, column=4, value=row[4])       # ALAMAT
+        ws.cell(row=excel_row, column=5, value=row[5])       # RT
+        ws.cell(row=excel_row, column=6, value=row[6])       # RW
+        ws.cell(row=excel_row, column=7, value=row[7])       # KECAMATAN
+        
+        # konversi bungkus ke KG (misal 1 bungkus = 2.5 kg)
+        ws.cell(row=excel_row, column=8, value=row[8] * 3)
+
+        ws.cell(row=excel_row, column=9, value=row[9])       # TANDA TANGAN
+
+    # simpan ke memory
+    stream = io.BytesIO()
+    wb.save(stream)
+    stream.seek(0)
+
+    return StreamingResponse(
+        stream,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": "attachment; filename=penyaluran2026.xlsx"
+        }
+    )

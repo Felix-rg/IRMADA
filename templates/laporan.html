@@ -373,11 +373,13 @@ Total Keseluruhan
     <th>No</th>
     <th>Tanggal</th>
     <th>Jam</th>
+    <th>Kategori</th>
     <th>Nama</th>
+    <th>Nik</th>
     <th>Alamat</th>
     <th>RT</th>
     <th>RW</th>
-    <th>Kategori</th>
+    <th>Kecamatan</th>
     <th>Jiwa</th>
     <th>Beras</th>
     <th>Aksi</th>
@@ -395,13 +397,15 @@ Total Keseluruhan
         <td>{{ loop.index }}</td>
         <td>{{x[1]}}</td>  <!-- tanggal -->
         <td>{{x[2]}}</td>  <!-- jam -->
-        <td>{{x[4]}}</td>  <!-- nama -->
-        <td>{{x[5]}}</td>  <!-- alamat -->
-        <td>{{x[6]}}</td>  <!-- rt -->
-        <td>{{x[7]}}</td>  <!-- rw -->
-        <td>{{x[3]}}</td>  <!-- kategori -->
+        <td>{{x[3]}}</td>  <!-- nama -->
+        <td>{{x[4]}}</td>  <!-- alamat -->
+        <td>{{x[5]}}</td>  <!-- rt -->
+        <td>{{x[6]}}</td>  <!-- rw -->
+        <td>{{x[7]}}</td>  <!-- kategori -->
         <td>{{x[8]}}</td>  <!-- jiwa -->
         <td>{{x[9]}}</td>  <!-- bungkus -->
+        <td>{{x[10]}}</td>  <!-- nik -->
+        <td>{{x[11]}}</td>  <!-- kecamatan -->
         
         <td>
             
@@ -478,37 +482,27 @@ Hapus
 <tr>
 
 <td>{{ loop.index }}</td>
-
 <td>{{x[1]}}</td>
 <td>{{x[2]}}</td>
-<td>{{x[4]}}</td>
-<td>{{x[5]}}</td>
-<td>{{x[6]}}</td>
-<td>{{x[7]}}</td>
-<td>{{x[3]}}</td>
-
+<td>{{x[4]}}</td> <!-- nama -->
+<td>{{x[6]}}</td> <!-- alamat -->
+<td>{{x[7]}}</td> <!-- rt -->
+<td>{{x[8]}}</td> <!-- rw -->
+<td>{{x[3]}}</td> <!-- kategori -->
 <td>
-{% if x[8] == "Zakat Maal" %}
-<span class="badge bg-primary">Zakat Maal</span>
-
-{% elif x[8] == "Infaq" %}
-<span class="badge bg-success">Infaq</span>
-
-{% elif x[8] == "Shodaqoh" %}
-<span class="badge bg-warning text-dark">Shodaqoh</span>
-
-{% else %}
-<span class="badge bg-secondary">{{x[8]}}</span>
-{% endif %}
+    {% if x[10] == "Zakat Maal" %}
+    <span class="badge bg-primary">Zakat Maal</span>
+    {% elif x[10] == "Infaq" %}
+    <span class="badge bg-success">Infaq</span>
+    {% elif x[10] == "Shodaqoh" %}
+    <span class="badge bg-warning text-dark">Shodaqoh</span>
+    {% endif %}
 </td>
-
 <td>
-Rp {{ "{:,.0f}".format(x[9]).replace(",",".") }}
+    Rp {{ "{:,.0f}".format(x[11]|int).replace(",",".") }}
 </td>
-
 <td>
-
-<button
+    <button
 class="btn btn-warning btn-sm"
 data-bs-toggle="modal"
 data-bs-target="#editMaal{{x[0]}}">
@@ -521,8 +515,8 @@ href="/hapus_maal/{{x[0]}}"
 onclick="return confirm('Hapus data?')">
 Hapus
 </a>
-
 </td>
+
 
 </tr>
 
@@ -573,27 +567,6 @@ Hapus
 <input class="form-control" type="date" name="tanggal" value="{{x[1]}}" required>
 
 <br>
-
-<label>Nama</label>
-<input class="form-control" type="text" name="nama" value="{{x[4]}}" required>
-
-<br>
-
-<label>Alamat</label>
-<input class="form-control" type="text" name="alamat" value="{{x[5]}}" required>
-
-<br>
-
-<label>RT</label>
-<input class="form-control" type="text" name="rt" value="{{x[6]}}" required>
-
-<br>
-
-<label>RW</label>
-<input class="form-control" type="text" name="rw" value="{{x[7]}}" required>
-
-<br>
-
 <label>Kategori</label>
 <select class="form-control" name="kategori">
 
@@ -606,16 +579,41 @@ Instansi
 </option>
 
 </select>
+<br>
+
+<label>Nama</label>
+<input class="form-control" type="text" name="nama" value="{{x[4]}}" required>
+
+<br>
+<label for="">Nik</label>
+<input type="text" name="nik" class="form-control" value="{{x[5]}}" required>
+<br>
+<label>Alamat</label>
+<input class="form-control" type="text" name="alamat" value="{{x[6]}}" required>
+
+<br>
+
+<label>RT</label>
+<input class="form-control" type="text" name="rt" value="{{x[7]}}" required>
+
+<br>
+
+<label>RW</label>
+<input class="form-control" type="text" name="rw" value="{{x[8]}}" required>
+
+<br>
+<label for="">Kecamatan</label>
+<input class="form-control" type="text" name="kecamatan" value="{{x[9]}}" required>
 
 <br>
 
 <label>Jumlah Jiwa</label>
-<input class="form-control" type="number" name="jiwa" value="{{x[8]}}" required>
+<input class="form-control" type="number" name="jiwa" value="{{x[10]}}" required>
 
 <br>
 
 <label>Jumlah Beras</label>
-<input class="form-control" type="number" name="bungkus" value="{{x[9]}}" required>
+<input class="form-control" type="number" name="bungkus" value="{{x[11]}}" required>
 
 </div>
 
@@ -646,31 +644,10 @@ Instansi
 
 <div class="modal-body">
 
-<label>Tanggal</label>
-<input class="form-control" type="date" name="tanggal" value="{{x[1]}}" required>
-
+    <label>Tanggal</label>
+    <input class="form-control" type="date" name="tanggal" value="{{x[1]}}" required>
+    
 <br>
-
-<label>Nama</label>
-<input class="form-control" type="text" name="nama" value="{{x[4]}}" required>
-
-<br>
-
-<label>Alamat</label>
-<input class="form-control" type="text" name="alamat" value="{{x[5]}}" required>
-
-<br>
-
-<label>RT</label>
-<input class="form-control" type="text" name="rt" value="{{x[6]}}" required>
-
-<br>
-
-<label>RW</label>
-<input class="form-control" type="text" name="rw" value="{{x[7]}}" required>
-
-<br>
-
 <label>Kategori</label>
 <select class="form-control" name="kategori">
 
@@ -681,32 +658,46 @@ Perorangan
 <option value="instansi" {% if x[3]=='instansi' %}selected{% endif %}>
 Instansi
 </option>
+<br>
+<label>Nama</label>
+<input class="form-control" type="text" name="nama" value="{{x[4]}}" required>
+
+<br>
+<label for="">Nik</label>
+<input type="text" name="" class="form-control" name="nik" value="{{x[5]}}" required>
+<br>
+
+<label>Alamat</label>
+<input class="form-control" type="text" name="alamat" value="{{x[6  ]}}" required>
+<br>
+
+<label>RT</label>
+<input class="form-control" type="text" name="rt" value="{{x[7]}}" required>
+<br>
+
+<label>RW</label>
+<input class="form-control" type="text" name="rw" value="{{x[8]}}" required>
+
+<br>
+<label>Kecamatan</label>
+<input class="form-control" type="text" name="kecamatan" value="{{x[9]}}" required>
+
+<br>
+<label class="form-label">Keterangan</label>
+<select class="form-select" name="jenis" required>
+
+    <option value="Zakat Maal">Zakat Maal</option>
+    <option value="Infaq">Infaq</option>
+    <option value="Shodaqoh">Shodaqoh</option>
 
 </select>
 
 <br>
-
-<label>Jenis</label>
-<select class="form-control" name="jenis">
-
-<option value="Zakat Maal" {% if x[8]=='Zakat Maal' %}selected{% endif %}>
-Zakat Maal
-</option>
-
-<option value="Infaq" {% if x[8]=='Infaq' %}selected{% endif %}>
-Infaq
-</option>
-
-<option value="Shodaqoh" {% if x[8]=='Shodaqoh' %}selected{% endif %}>
-Shodaqoh
-</option>
-
-</select>
+<label for="">nominal</label>
+<input type="number" name="nominal" class="form-control" value="{{x[11]}}" required>    
 
 <br>
 
-<label>Nominal</label>
-<input class="form-control" type="number" name="nominal" value="{{x[9]}}" required>
 
 </div>
 

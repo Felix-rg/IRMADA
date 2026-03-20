@@ -44,6 +44,29 @@ font-size:13px;
 
 </head>
 
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+const alamatSelect = document.getElementById("alamatSelect");
+const manualAlamat = document.getElementById("manualAlamat");
+
+if(alamatSelect){
+
+alamatSelect.addEventListener("change", function(){
+
+if(alamatSelect.value === "lainnya"){
+manualAlamat.style.display = "block";
+}else{
+manualAlamat.style.display = "none";
+}
+
+});
+
+}
+
+});
+</script>
+
 <body>
 
 <div class="container mt-3">
@@ -78,7 +101,19 @@ Desa Ajibarang Wetan RT 02 RW 01
 <!-- STATISTIK -->
 
 <div class="row g-3 mb-3">
+<div id="alertBox"></div>
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
+  <div id="successToast" class="toast align-items-center text-bg-success border-0" role="alert">
+    
+    <div class="d-flex">
+      <div class="toast-body">
+        Data penyaluran berhasil disimpan
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
 
+  </div>
+</div>
 <div class="col-md-3">
 
 <div class="card-box text-center">
@@ -146,7 +181,7 @@ Rp {{ "{:,.0f}".format(total_uang).replace(",",".") }}
 
 <div class="mb-3">
 <label>Tanggal</label>
-<input type="date" name="tanggal" class="form-control" required>
+<input type="date" id="tanggal" name="tanggal" class="form-control" required>
 </div>
 
 
@@ -155,36 +190,84 @@ Rp {{ "{:,.0f}".format(total_uang).replace(",",".") }}
 <input type="text" name="nama" class="form-control" required>
 </div>
 
+<div class="mb-3">
+<label>Nik</label>
+<input type="text" name="nik" class="form-control">
+</div>
 
 <div class="mb-3">
-<label>Alamat</label>
-<input type="text" name="alamat" class="form-control">
+<label>Desa</label>
+    <select name="alamat" id="alamatSelect" class="form-select">
+        <option value="Ajibarang Wetan">Ajibarang Wetan</option>
+        <option value="Ajibarang Kulon">Ajibarang Kulon</option>
+        <option value="lainnya">Lainnya</option>
+    </select>
+</div>
+<div class="mb-3" id="manualAlamat" style="display:none;">
+<label class="form-label">Desa Manual</label>
+        <input
+        type="text"
+        class="form-control"
+        name="alamat_manual"
+        placeholder="Masukkan alamat">
 </div>
 
 
 <div class="row">
 
-<div class="col-md-6">
+    <div class="mb-3">
+    <label class="form-label">RT</label>
+        <select class="form-select" name="rt" required>
 
-<label>RT</label>
-<input type="text" name="rt" class="form-control">
+            <option value="">Pilih RT</option>
 
+            <option value="01">01</option>
+            <option value="02">02</option>
+            <option value="03">03</option>
+            <option value="04">04</option>
+            <option value="05">05</option>
+            <option value="06">06</option>
+            <option value="07">07</option>
+            <option value="08">08</option>
+            <option value="09">09</option>
+            <option value="10">10</option>
+
+        </select>
+    </div>
+
+
+<div class="mb-3">
+    <label class="form-label">RW</label>
+    <select class="form-select" name="rw" required>
+
+        <option value="">Pilih RW</option>
+
+        <option value="01">01</option>
+        <option value="02">02</option>
+        <option value="03">03</option>
+        <option value="04">04</option>
+        <option value="05">05</option>
+        <option value="06">06</option>
+        <option value="07">07</option>
+        <option value="08">08</option>
+        <option value="09">09</option>
+        <option value="10">10</option>
+
+    </select>
 </div>
 
-
-<div class="col-md-6">
-
-<label>RW</label>
-<input type="text" name="rw" class="form-control">
-
 </div>
-
-</div>
-
 
 <br>
 
 <div class="mb-3">
+<label>Kecamatan</label>
+<input type="text" name="kecamatan" class="form-control">
+</div>
+
+<br>
+
+<!-- <div class="mb-3">
 
 <label>Kategori</label>
 
@@ -198,14 +281,14 @@ Rp {{ "{:,.0f}".format(total_uang).replace(",",".") }}
 
 </select>
 
-</div>
+</div> -->
 
 
 <div class="mb-3">
 
 <label>Beras (bungkus)</label>
 
-<input type="number" name="beras" class="form-control">
+<input type="number" name="jumlah_bungkus" class="form-control">
 
 </div>
 
@@ -237,11 +320,14 @@ Simpan Penyaluran
 <th>No</th>
 <th>Tanggal</th>
 <th>Nama</th>
-<th>Alamat</th>
+<th>NIK</th>
+<th>Desa</th>
 <th>RT</th>
 <th>RW</th>
-<th>Kategori</th>
-<th>Beras</th>
+<th>Kecamatan</th>
+<th>Jumlah Bungkus</th>
+<th>Tanda Tangan</th>
+<th>Aksi</th>
 
 </tr>
 
@@ -261,6 +347,22 @@ Simpan Penyaluran
 <td>{{ x[5] }}</td>
 <td>{{ x[6] }}</td>
 <td>{{ x[7] }}</td>
+<td>{{ x[8] }}</td>
+<td>{{ x[9] }}</td>
+
+<td>
+    <button class="btn btn-warning btn-sm"
+    data-bs-toggle="modal"
+    data-bs-target="#editPenyaluran{{x[0]}}">
+    Edit
+    </button>
+
+    <a href="/hapus_penyaluran/{{x[0]}}" 
+       class="btn btn-danger btn-sm"
+       onclick="return confirm('Yakin mau hapus?')">
+       Hapus
+    </a>
+</td>
 
 </tr>
 
@@ -269,7 +371,11 @@ Simpan Penyaluran
 </tbody>
 
 </table>
-
+<div>
+<a href="/export_penyaluran" class="btn btn-success mb-3">
+    Export Excel Penyaluran
+</a>
+</div>
 </div>
 
 </div>
@@ -311,6 +417,114 @@ RT 02 RW 01 Ajibarang Wetan
 
 </footer>
 
+{% for x in penyaluran %}
 
+<div class="modal fade" id="editPenyaluran{{x[0]}}">
+<div class="modal-dialog">
+<div class="modal-content">
+
+<div class="modal-header">
+<h5>Edit Penyaluran</h5>
+<button class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<form method="post" action="/edit_penyaluran/{{x[0]}}">
+
+<div class="modal-body">
+
+<label>Tanggal</label>
+<input type="date" name="tanggal" class="form-control" value="{{x[1]}}" required>
+
+<br>
+
+<label>Nama</label>
+<input type="text" name="nama" class="form-control" value="{{x[2]}}" required>
+
+<br>
+
+<label>NIK</label>
+<input type="text" name="nik" class="form-control" value="{{x[3]}}">
+
+<br>
+
+<label>Alamat</label>
+<input type="text" name="alamat" class="form-control" value="{{x[4]}}" required>
+
+<br>
+
+<label>RT</label>
+<input type="text" name="rt" class="form-control" value="{{x[5]}}" required>
+
+<br>
+
+<label>RW</label>
+<input type="text" name="rw" class="form-control" value="{{x[6]}}" required>
+
+<br>
+
+<label>Kecamatan</label>
+<input type="text" name="kecamatan" class="form-control" value="{{x[7]}}">
+
+<br>
+
+<label>Jumlah Bungkus</label>
+<input type="number" name="jumlah_bungkus" class="form-control" value="{{x[8]}}" required>
+
+</div>
+
+<div class="modal-footer">
+<button class="btn btn-primary">Update</button>
+</div>
+
+</form>
+
+</div>
+</div>
+</div>
+
+{% endfor %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+
+let now = new Date();
+
+let year = now.getFullYear();
+let month = String(now.getMonth() + 1).padStart(2,'0');
+let day = String(now.getDate()).padStart(2,'0');
+
+let today = year + "-" + month + "-" + day;
+
+document.getElementById("tanggal").value = today;
+
+let tanggal = document.getElementById("tanggal");
+
+if(tanggal){
+tanggal.value = today;
+}
+
+});
+
+
+document.addEventListener("DOMContentLoaded", function(){
+    
+const urlParams = new URLSearchParams(window.location.search);
+
+if(urlParams.get('success') === '1'){
+
+let toastElement = document.getElementById("successToast");
+
+let toast = new bootstrap.Toast(toastElement,{
+delay:3000
+});
+
+toast.show();
+
+window.history.replaceState({}, document.title, window.location.pathname);
+
+}
+
+});
+</script>
 </body>
 </html>

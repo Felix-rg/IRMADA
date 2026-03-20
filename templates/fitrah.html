@@ -120,7 +120,21 @@ manualJiwa.style.display = "none";
 });
 
 }
+/* =======================
+   KECAMATAN SELECT
+======================= */
+const kecamatanSelect = document.getElementById("kecamatanSelect");
+const manualKecamatan = document.getElementById("manualKecamatan");
 
+if(kecamatanSelect){
+    kecamatanSelect.addEventListener("change", function(){
+        if(kecamatanSelect.value === "lainnya"){
+            manualKecamatan.style.display = "block";
+        } else {
+            manualKecamatan.style.display = "none";
+        }
+    });
+}
 
 /* =======================
    BUNGKUS SELECT
@@ -200,7 +214,12 @@ Masjid Daarul Muttaqin
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Nama Kepala Keluarga</label>
+                    <label class="form-label">NIK</label>
+                    <input type="numeric" class="form-control" name="nik" id="nik" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nama Muzzaki</label>
                     <input type="text" class="form-control" name="nama" id="nama" required>
                 </div>
 
@@ -259,6 +278,22 @@ Masjid Daarul Muttaqin
     
                         </select>
                     </div>
+
+                    <div class="mb-3">
+                    <label class="form-label">Kecamatan</label>
+                    <select name="kecamatan" id="kecamatanSelect" class="form-select">
+                        <option value="Ajibarang">Ajibarang</option>
+                        <option value="lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div class="mb-3" id="manualKecamatan" style="display:none;">
+                        <label class="form-label">Kecamatan Manual</label>
+                        <input
+                        type="text"
+                        class="form-control"
+                        name="kecamatan_manual"
+                        placeholder="Masukkan kecamatan">
+                </div>
     
                     <div class="mb-3">
                         <label class="form-label">Jumlah Jiwa</label>
@@ -341,7 +376,7 @@ Masjid Daarul Muttaqin
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function(){
+document.addEventListener("DOMContentLoaded", function(){
 
 let now = new Date();
 
