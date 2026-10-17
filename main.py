@@ -25,8 +25,9 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 def db():
-    return sqlite3.connect("database.db")
-
+    return psycopg.connect(
+        os.environ["DATABASE_URL"]
+    )
 
 @app.get("/")
 def home(request: Request):
